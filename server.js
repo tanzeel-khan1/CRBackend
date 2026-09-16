@@ -16,10 +16,14 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// CORS allow all
+const allowedOrigins = [
+  'https://tbuilds.netlify.app',
+  'http://localhost:7000',
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    // allow tools like Postman (no origin) + allowed domains
+    // Allow server-to-server tools without an Origin header.
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -31,10 +35,6 @@ app.use(cors({
   credentials: true
 }));
 
-const allowedOrigins = [
-  "http://localhost:7000",
-  "https://tynvora.netlify.app"
-];
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
