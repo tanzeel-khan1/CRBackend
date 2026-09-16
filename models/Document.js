@@ -6,6 +6,7 @@ const documentSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: { type: String, default: '' },
   file_url: { type: String },
+  cloudinary_public_id: { type: String },
   file_type: { type: String },
   file_size: { type: Number },
   category: {

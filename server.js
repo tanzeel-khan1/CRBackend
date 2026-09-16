@@ -10,7 +10,7 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
 dotenv.config();
-const { documentStorage } = require('./config/cloudinaryConfig');
+const { cloudinary, documentStorage } = require('./config/cloudinaryConfig');
 connectDB();
 
 const app = express();
@@ -63,6 +63,11 @@ app.use('/uploads', express.static(uploadsDir));
 const upload = multer({
   storage: documentStorage,
   limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => {
+    const isPdf = file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname);
+    if (isPdf) return callback(new Error('PDF uploads are temporarily unavailable. Please try again later.'));
+    callback(null, true);
+  },
 });
 const { protect } = require('./middleware/auth');
 
@@ -82,8 +87,23 @@ app.post('/api/upload', protect, (req, res, next) => upload.single('file')(req, 
   next();
 }), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+  const resourceType = req.file.mimetype.startsWith('image/') || req.file.mimetype === 'application/pdf'
+    ? 'image'
+    : 'raw';
+  const publicId = req.file.public_id || req.file.filename;
+  const fileUrl = publicId
+    ? cloudinary.url(publicId, {
+      secure: true,
+      type: 'upload',
+      resource_type: resourceType,
+      sign_url: true,
+    })
+    : req.file.path;
+
   res.json({
-    file_url: req.file.path,
+    file_url: fileUrl,
+    cloudinary_public_id: publicId,
     file_type: req.file.mimetype,
     file_size: req.file.size,
   });

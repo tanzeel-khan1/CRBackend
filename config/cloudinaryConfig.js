@@ -27,14 +27,16 @@ const propertyImageStorage = new CloudinaryStorage({
 
 const documentStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
+  params: async (req, file) => ({
     folder: 'tbuilds_os_documents',
-    resource_type: 'auto',
+    resource_type: file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf' ? 'image' : 'raw',
+    type: 'upload',
+    access_control: [{ access_type: 'anonymous' }],
     allowed_formats: [
       'jpg', 'jpeg', 'png', 'webp', 'avif', 'pdf', 'doc', 'docx',
       'xls', 'xlsx', 'csv', 'txt', 'zip',
     ],
-  },
+  }),
 });
 
 module.exports = { cloudinary, propertyImageStorage, documentStorage };

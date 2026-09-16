@@ -94,7 +94,7 @@ const createCheckoutSession = async (req, res) => {
     console.error("Create checkout error:", error);
 
     return res.status(500).json({
-      message: "Checkout create nahi hua",
+      message: "Checkout could not be created",
     });
   }
 };
@@ -136,7 +136,7 @@ const verifyCheckoutSession = async (req, res) => {
 
     if (session.payment_status !== "paid") {
       return res.status(400).json({
-        message: "Payment abhi complete nahi hui",
+        message: "Payment has not been completed",
         paymentStatus: session.payment_status,
       });
     }
@@ -150,7 +150,7 @@ const verifyCheckoutSession = async (req, res) => {
 
     let subscription = session.subscription;
 
-    // Agar sirf ID mili hai object nahi, toh manually retrieve karo
+    // Retrieve the subscription when Stripe returns only its ID.
     if (subscription && typeof subscription === "string") {
       subscription = await stripe.subscriptions.retrieve(subscription);
     }
@@ -238,7 +238,7 @@ if (subItem?.current_period_end) {
     console.error("Verify checkout error:", error);
 
     return res.status(500).json({
-      message: "Subscription verify nahi hui",
+      message: "Subscription could not be verified",
       error: error.message,
     });
   }
@@ -377,7 +377,7 @@ const getUserSubscriptionById = async (req, res) => {
     console.error("Get user subscription error:", error);
 
     return res.status(500).json({
-      message: "User subscription fetch nahi hui",
+      message: "User subscription could not be loaded",
       error: error.message,
     });
   }
@@ -509,7 +509,7 @@ const getBillingOverview = async (req, res) => {
   } catch (error) {
     console.error("Get billing overview error:", error);
     return res.status(500).json({
-      message: "Billing overview fetch nahi hui",
+      message: "Billing overview could not be loaded",
       error: error.message,
     });
   }
@@ -542,7 +542,7 @@ const createPortalSession = async (req, res) => {
   } catch (error) {
     console.error("Create portal session error:", error);
     return res.status(500).json({
-      message: "Billing portal session create nahi hui",
+      message: "Billing portal session could not be created",
       error: error.message,
     });
   }
@@ -588,7 +588,7 @@ const cancelSubscription = async (req, res) => {
   } catch (error) {
     console.error("Cancel subscription error:", error);
     return res.status(500).json({
-      message: "Subscription cancel nahi hui",
+      message: "Subscription could not be cancelled",
       error: error.message,
     });
   }
