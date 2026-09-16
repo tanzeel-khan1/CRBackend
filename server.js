@@ -10,6 +10,7 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
 dotenv.config();
+const { documentStorage } = require('./config/cloudinaryConfig');
 connectDB();
 
 const app = express();
@@ -59,18 +60,33 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
 
 // File upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) =>
-    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`),
+const upload = multer({
+  storage: documentStorage,
+  limits: { fileSize: 20 * 1024 * 1024 },
 });
-
-const upload = multer({ storage });
 const { protect } = require('./middleware/auth');
 
-app.post('/api/upload', protect, upload.single('file'), (req, res) => {
+app.post('/api/upload', protect, (req, res, next) => upload.single('file')(req, res, (error) => {
+  if (error) {
+    const providerMessage = error.error?.message
+      || error.message
+      || error.toString?.()
+      || 'File upload failed';
+    console.error('Cloudinary upload failed:', providerMessage);
+
+    const message = providerMessage.toLowerCase().includes('signature')
+      ? 'Cloudinary signature rejected. Verify your Cloudinary environment variables.'
+      : providerMessage;
+    return res.status(400).json({ message });
+  }
+  next();
+}), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-  res.json({ file_url: `/uploads/${req.file.filename}` });
+  res.json({
+    file_url: req.file.path,
+    file_type: req.file.mimetype,
+    file_size: req.file.size,
+  });
 });
 
 // Test route

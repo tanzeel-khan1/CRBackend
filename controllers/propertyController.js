@@ -3,6 +3,26 @@ const { canAccessCompany } = require('../middleware/companyAccess');
 
 const hasCompanyAccess = (req, companyId) => canAccessCompany(req.user.email, companyId);
 
+const getRequestedCompanyId = (req) => (
+  req.body.company_id
+  || req.user.activeCompany?.id
+  || req.user.activeCompany?._id
+);
+
+const getUploadedPhotoUrls = (req) => (
+  Array.isArray(req.files) ? req.files.map((file) => file.path).filter(Boolean) : []
+);
+
+const getExistingPhotos = (value) => {
+  if (!value) return null;
+  try {
+    const photos = JSON.parse(value);
+    return Array.isArray(photos) ? photos.filter((photo) => typeof photo === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+
 const getProperties = async (req, res) => {
   try {
     const { company_id: companyId } = req.query;
@@ -22,12 +42,20 @@ const getProperties = async (req, res) => {
 
 const createProperty = async (req, res) => {
   try {
-    const data = { ...req.body };
-    if (!data.company_id || !(await hasCompanyAccess(req, data.company_id))) {
+    const companyId = getRequestedCompanyId(req);
+    if (!companyId || !(await hasCompanyAccess(req, companyId))) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const property = await Property.create({ ...data, created_by: req.user.email });
+    const data = {
+      ...req.body,
+      company_id: companyId,
+      photos: getUploadedPhotoUrls(req),
+      created_by: req.user.email,
+    };
+    delete data.existing_photos;
+
+    const property = await Property.create(data);
     res.status(201).json(property);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -45,6 +73,14 @@ const updateProperty = async (req, res) => {
     const data = { ...req.body };
     delete data.company_id;
     delete data.created_by;
+    delete data.existing_photos;
+
+    const uploadedPhotos = getUploadedPhotoUrls(req);
+    const existingPhotos = getExistingPhotos(req.body.existing_photos);
+    if (uploadedPhotos.length || existingPhotos) {
+      data.photos = [...(existingPhotos || property.photos || []), ...uploadedPhotos];
+    }
+
     const updated = await Property.findByIdAndUpdate(req.params.id, data, {
       new: true,
       runValidators: true,

@@ -17,20 +17,34 @@ const getDocuments = async (req, res) => {
 };
 
 const createDocument = async (req, res) => {
-  const { company_id } = req.body;
-  if (company_id && !await canAccessCompany(req.user.email, company_id))
-    return res.status(403).json({ message: 'Access denied' });
-  const doc = await Document.create({ ...req.body, created_by: req.user.email });
-  res.status(201).json(doc);
+  try {
+    const data = { ...req.body };
+    const { company_id } = data;
+    if (company_id && !await canAccessCompany(req.user.email, company_id))
+      return res.status(403).json({ message: 'Access denied' });
+
+    if (!data.section_id) delete data.section_id;
+    const doc = await Document.create({ ...data, created_by: req.user.email });
+    res.status(201).json(doc);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const updateDocument = async (req, res) => {
-  const doc = await Document.findById(req.params.id);
-  if (!doc) return res.status(404).json({ message: 'Document not found' });
-  if (doc.company_id && !await canAccessCompany(req.user.email, doc.company_id.toString()))
-    return res.status(403).json({ message: 'Access denied' });
-  const updated = await Document.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updated);
+  try {
+    const doc = await Document.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Document not found' });
+    if (doc.company_id && !await canAccessCompany(req.user.email, doc.company_id.toString()))
+      return res.status(403).json({ message: 'Access denied' });
+
+    const data = { ...req.body };
+    if (!data.section_id) data.section_id = null;
+    const updated = await Document.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
+    res.json(updated);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const deleteDocument = async (req, res) => {
