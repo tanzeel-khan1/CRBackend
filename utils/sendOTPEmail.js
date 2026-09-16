@@ -1,16 +1,10 @@
-const nodemailer = require("nodemailer");
+const createMailer = require('./mailer');
 
 const sendOTPEmail = async (email, otp) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const transporter = createMailer();
 
   await transporter.sendMail({
-    from: `InvestorOS <${process.env.EMAIL_USER}>`,
+    from: `Tanzil · TBuilds OS <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email - OTP Code",
 
@@ -19,7 +13,7 @@ const sendOTPEmail = async (email, otp) => {
         <div style="max-width:500px; margin:auto; background:white; padding:30px; border-radius:10px;">
 
           <h2 style="color:#111; margin-bottom:10px;">
-            Welcome to Investor Dashboard 🚀
+            Welcome to TBuilds OS 🚀
           </h2>
 
           <p style="color:#555; font-size:14px;">
@@ -43,7 +37,7 @@ const sendOTPEmail = async (email, otp) => {
           </p>
 
           <p style="font-size:12px; color:#aaa;">
-            InvestorOS Team
+            Tanzil · TBuilds OS
           </p>
 
         </div>

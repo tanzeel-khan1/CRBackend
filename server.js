@@ -84,6 +84,8 @@ app.use('/api/companies', require('./routes/companyRoutes'));
 app.use('/api/expenses', require('./routes/expenseRoutes'));
 app.use('/api/invoices', require('./routes/invoiceRoutes'));
 app.use('/api/investors', require('./routes/investorRoutes'));
+app.use('/api/clients', require('./routes/clientRoutes'));
+app.use('/api/properties', require('./routes/propertyRoutes'));
 app.use('/api/employees', require('./routes/employeeRoutes'));
 app.use('/api/notes', require('./routes/noteRoutes'));
 app.use('/api/ideas', require('./routes/ideaRoutes'));
