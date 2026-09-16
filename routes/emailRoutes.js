@@ -31,7 +31,7 @@ router.post('/', protect, async (req, res) => {
     <div style="margin:0;background:#f4f5f7;padding:32px 16px;font-family:Arial,sans-serif;color:#172033;">
       <div style="max-width:640px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;">
         <div style="background:#07101f;padding:28px 32px;color:#fff;">
-          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#f8d36a;font-weight:700;">TBuilds OS</div>
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#f8d36a;font-weight:700;">Tbuilds</div>
           <div style="font-size:26px;font-weight:700;margin-top:10px;">Invoice</div>
           <div style="font-size:13px;color:#b7c0cf;margin-top:5px;">Prepared for ${escapeHtml(invoice.recipient_name)}</div>
         </div>
@@ -49,22 +49,22 @@ router.post('/', protect, async (req, res) => {
           ${invoice.notes ? `<div style="margin-top:20px;font-size:13px;color:#64748b;"><strong>Notes</strong><div style="margin-top:6px;white-space:pre-line;">${escapeHtml(invoice.notes)}</div></div>` : ''}
           <p style="margin:28px 0 0;color:#64748b;font-size:13px;line-height:1.6;">Thank you for your business.</p>
         </div>
-        <div style="border-top:1px solid #e5e7eb;padding:18px 32px;color:#94a3b8;font-size:12px;">Sent by Tanzil · TBuilds OS</div>
+        <div style="border-top:1px solid #e5e7eb;padding:18px 32px;color:#94a3b8;font-size:12px;">Sent by Tbuilds</div>
       </div>
     </div>
   ` : `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
       <h2 style="color:#333;">${safeSubject}</h2>
-      <p style="color:#666;line-height:1.6;white-space:pre-line;">${escapeHtml(body || 'A document has been shared with you via TBuilds OS.')}</p>
+      <p style="color:#666;line-height:1.6;white-space:pre-line;">${escapeHtml(body || 'A document has been shared with you via Tbuilds.')}</p>
       ${file_url ? `<p><a href="${escapeHtml(file_url)}" style="background:#111827;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px;">View / Download ${escapeHtml(file_name || 'Document')}</a></p>` : ''}
       <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
-      <p style="color:#999;font-size:12px;">Sent by Tanzil · TBuilds OS</p>
+      <p style="color:#999;font-size:12px;">Sent by Tbuilds</p>
     </div>
   `;
 
   try {
     await createMailer().sendMail({
-      from: `"Tanzil · TBuilds OS" <${process.env.EMAIL_USER || process.env.SMTP_USER}>`,
+      from: `"Tbuilds" <${process.env.EMAIL_USER || process.env.SMTP_USER}>`,
       to,
       subject: subject || 'Document shared with you',
       html,

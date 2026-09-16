@@ -15,8 +15,6 @@ const documentSchema = new mongoose.Schema({
   },
   tags: [{ type: String }],
   is_personal: { type: Boolean, default: false },
-  signed: { type: Boolean, default: false },
-  signed_by: [{ type: String }],
   created_by: { type: String },
 }, { timestamps: true });
 

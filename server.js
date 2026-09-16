@@ -91,7 +91,7 @@ app.post('/api/upload', protect, (req, res, next) => upload.single('file')(req, 
 
 // Test route
 app.get('/', (req, res) => {
-  res.json({ success: true, message: 'InvestorOS API is running' });
+  res.json({ success: true, message: 'Tbuilds API is running' });
 });
 
 // REST routes

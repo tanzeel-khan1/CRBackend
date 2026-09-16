@@ -1,7 +1,7 @@
 {
-  "name": "investoros-backend",
+  "name": "tbuilds-backend",
   "version": "1.0.0",
-  "description": "InvestorOS backend API",
+  "description": "Tbuilds backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
