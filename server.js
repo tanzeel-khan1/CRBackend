@@ -19,6 +19,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'https://tbuilds.netlify.app',
   'http://localhost:7000',
+  'https://app.tanzilbuilds.xyz'
 ];
 
 app.use(cors({
