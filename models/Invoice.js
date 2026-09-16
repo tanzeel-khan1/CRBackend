@@ -20,7 +20,6 @@ const invoiceSchema = new mongoose.Schema({
   status: { type: String, enum: ['draft', 'sent', 'viewed', 'paid', 'overdue', 'archived'], default: 'draft' },
   items: [invoiceItemSchema],
   notes: { type: String },
-  type: { type: String, enum: ['company_to_investor', 'investor_to_company', 'external'], default: 'external' },
   created_by: { type: String },
 }, { timestamps: true });
 
