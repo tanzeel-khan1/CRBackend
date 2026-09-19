@@ -17,7 +17,7 @@ const app = express();
 const server = http.createServer(app);
 
 const allowedOrigins = [
-  'https://tbuilds.netlify.app',
+  'https://ranvola.netlify.app',
   'http://localhost:7000',
   'https://app.tanzilbuilds.xyz'
 ];
@@ -112,7 +112,7 @@ app.post('/api/upload', protect, (req, res, next) => upload.single('file')(req, 
 
 // Test route
 app.get('/', (req, res) => {
-  res.json({ success: true, message: 'Tbuilds API is running' });
+  res.json({ success: true, message: 'Ranvola API is running' });
 });
 
 // REST routes

@@ -15,7 +15,7 @@ const sendSubscriptionExpiryReminder = async ({ email, fullName, endDate, plan }
 
   await sendEmail({
     to: email,
-    subject: 'Your Tbuilds subscription is ending soon',
+    subject: 'Your Ranvola subscription is ending soon',
     html: `
       <div style="font-family: Arial, sans-serif; background:#f6f6f6; padding:20px;">
         <div style="max-width:520px; margin:auto; background:white; padding:30px; border-radius:10px;">
@@ -28,7 +28,7 @@ const sendSubscriptionExpiryReminder = async ({ email, fullName, endDate, plan }
             will end on <strong>${formattedEnd}</strong> (in 2 days).
           </p>
           <p style="color:#555; font-size:14px; line-height:1.6;">
-            To keep uninterrupted access to Tbuilds, please renew or update your plan before the end date.
+            To keep uninterrupted access to Ranvola, please renew or update your plan before the end date.
           </p>
           <p style="text-align:center; margin:28px 0;">
             <a href="${billingUrl}" style="background:#111; color:white; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:600; display:inline-block;">
@@ -39,7 +39,7 @@ const sendSubscriptionExpiryReminder = async ({ email, fullName, endDate, plan }
           <p style="font-size:12px; color:#888;">
             If you already renewed, you can ignore this email.
           </p>
-          <p style="font-size:12px; color:#aaa;">Tbuilds Team</p>
+          <p style="font-size:12px; color:#aaa;">Ranvola Team</p>
         </div>
       </div>
     `,

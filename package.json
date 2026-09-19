@@ -1,7 +1,7 @@
 {
-  "name": "tbuilds-backend",
+  "name": "ranvola-backend",
   "version": "1.0.0",
-  "description": "Tbuilds backend API",
+  "description": "Ranvola backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -10,7 +10,7 @@ cloudinary.config({
 const propertyImageStorage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'tbuilds_os_properties',
+    folder: 'ranvola_os_properties',
     resource_type: 'image',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     transformation: [
@@ -28,7 +28,7 @@ const propertyImageStorage = new CloudinaryStorage({
 const documentStorage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
-    folder: 'tbuilds_os_documents',
+    folder: 'ranvola_os_documents',
     resource_type: file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf' ? 'image' : 'raw',
     type: 'upload',
     access_control: [{ access_type: 'anonymous' }],

@@ -4,7 +4,7 @@ const sendOTPEmail = async (email, otp) => {
   const transporter = createMailer();
 
   await transporter.sendMail({
-    from: `Tbuilds <${process.env.EMAIL_USER}>`,
+    from: `Ranvola <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email - OTP Code",
 
@@ -13,7 +13,7 @@ const sendOTPEmail = async (email, otp) => {
         <div style="max-width:500px; margin:auto; background:white; padding:30px; border-radius:10px;">
 
           <h2 style="color:#111; margin-bottom:10px;">
-            Welcome to Tbuilds 🚀
+            Welcome to Ranvola 🚀
           </h2>
 
           <p style="color:#555; font-size:14px;">
@@ -37,7 +37,7 @@ const sendOTPEmail = async (email, otp) => {
           </p>
 
           <p style="font-size:12px; color:#aaa;">
-            Tbuilds
+            Ranvola
           </p>
 
         </div>
