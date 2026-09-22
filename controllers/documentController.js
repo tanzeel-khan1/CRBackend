@@ -3,24 +3,34 @@ const DocSection = require('../models/DocSection');
 const { canAccessCompany } = require('../middleware/companyAccess');
 
 const getDocuments = async (req, res) => {
-  const { company_id } = req.query;
-  if (company_id && req.query.is_personal !== 'true' && !await canAccessCompany(req.user.email, company_id))
-    return res.status(403).json({ message: 'Access denied' });
-  const filter = {};
-  if (company_id) filter.company_id = company_id;
-  if (req.query.is_personal === 'true') {
-    filter.is_personal = true;
-    filter.created_by = req.user.email;
+  const { company_id, is_personal } = req.query;
+
+  if (is_personal === 'true') {
+    const docs = await Document.find({ is_personal: true, created_by: req.user.email }).sort({ createdAt: -1 });
+    return res.json(docs);
   }
-  const docs = await Document.find(filter).sort({ createdAt: -1 });
+
+  if (!company_id) return res.status(400).json({ message: 'company_id required' });
+  if (!await canAccessCompany(req.user.email, company_id))
+    return res.status(403).json({ message: 'Access denied' });
+
+  const docs = await Document.find({ company_id }).sort({ createdAt: -1 });
   res.json(docs);
 };
 
 const createDocument = async (req, res) => {
   try {
     const data = { ...req.body };
-    const { company_id } = data;
-    if (company_id && !await canAccessCompany(req.user.email, company_id))
+    const { company_id, is_personal } = data;
+
+    if (is_personal === 'true') {
+      // Personal document — belongs to the current user only.
+      const doc = await Document.create({ ...data, company_id: null, created_by: req.user.email });
+      return res.status(201).json(doc);
+    }
+
+    if (!company_id) return res.status(400).json({ message: 'company_id required' });
+    if (!await canAccessCompany(req.user.email, company_id))
       return res.status(403).json({ message: 'Access denied' });
 
     if (!data.section_id) delete data.section_id;
@@ -35,8 +45,13 @@ const updateDocument = async (req, res) => {
   try {
     const doc = await Document.findById(req.params.id);
     if (!doc) return res.status(404).json({ message: 'Document not found' });
-    if (doc.company_id && !await canAccessCompany(req.user.email, doc.company_id.toString()))
+
+    if (doc.company_id) {
+      if (!await canAccessCompany(req.user.email, doc.company_id.toString()))
+        return res.status(403).json({ message: 'Access denied' });
+    } else if (doc.created_by !== req.user.email) {
       return res.status(403).json({ message: 'Access denied' });
+    }
 
     const data = { ...req.body };
     if (!data.section_id) data.section_id = null;
@@ -50,25 +65,31 @@ const updateDocument = async (req, res) => {
 const deleteDocument = async (req, res) => {
   const doc = await Document.findById(req.params.id);
   if (!doc) return res.status(404).json({ message: 'Document not found' });
-  if (doc.company_id && !await canAccessCompany(req.user.email, doc.company_id.toString()))
+
+  if (doc.company_id) {
+    if (!await canAccessCompany(req.user.email, doc.company_id.toString()))
+      return res.status(403).json({ message: 'Access denied' });
+  } else if (doc.created_by !== req.user.email) {
     return res.status(403).json({ message: 'Access denied' });
+  }
+
   await Document.findByIdAndDelete(req.params.id);
   res.json({ message: 'Document deleted' });
 };
 
 const getSections = async (req, res) => {
   const { company_id } = req.query;
-  if (company_id && !await canAccessCompany(req.user.email, company_id))
+  if (!company_id) return res.status(400).json({ message: 'company_id required' });
+  if (!await canAccessCompany(req.user.email, company_id))
     return res.status(403).json({ message: 'Access denied' });
-  const filter = {};
-  if (company_id) filter.company_id = company_id;
-  const sections = await DocSection.find(filter).sort({ createdAt: 1 });
+  const sections = await DocSection.find({ company_id }).sort({ createdAt: 1 });
   res.json(sections);
 };
 
 const createSection = async (req, res) => {
   const { company_id } = req.body;
-  if (company_id && !await canAccessCompany(req.user.email, company_id))
+  if (!company_id) return res.status(400).json({ message: 'company_id required' });
+  if (!await canAccessCompany(req.user.email, company_id))
     return res.status(403).json({ message: 'Access denied' });
   const section = await DocSection.create({ ...req.body, created_by: req.user.email });
   res.status(201).json(section);

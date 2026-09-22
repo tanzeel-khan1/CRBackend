@@ -107,6 +107,8 @@ userSchema.methods.comparePassword = async function (candidate) {
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
+  delete obj.emailOtp;
+  delete obj.emailOtpExpires;
   return obj;
 };
 
