@@ -3,17 +3,17 @@ const { canAccessCompany } = require('../middleware/companyAccess');
 
 const getEmployees = async (req, res) => {
   const { company_id } = req.query;
-  if (company_id && !await canAccessCompany(req.user.email, company_id))
+  if (!company_id) return res.status(400).json({ message: 'company_id required' });
+  if (!await canAccessCompany(req.user.email, company_id))
     return res.status(403).json({ message: 'Access denied' });
-  const filter = {};
-  if (company_id) filter.company_id = company_id;
-  const employees = await Employee.find(filter).sort({ createdAt: -1 });
+  const employees = await Employee.find({ company_id }).sort({ createdAt: -1 });
   res.json(employees);
 };
 
 const createEmployee = async (req, res) => {
   const { company_id } = req.body;
-  if (company_id && !await canAccessCompany(req.user.email, company_id))
+  if (!company_id) return res.status(400).json({ message: 'company_id required' });
+  if (!await canAccessCompany(req.user.email, company_id))
     return res.status(403).json({ message: 'Access denied' });
   const employee = await Employee.create({ ...req.body, created_by: req.user.email });
   res.status(201).json(employee);

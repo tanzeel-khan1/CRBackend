@@ -1,15 +1,32 @@
 const Activity = require('../models/Activity');
+const { canAccessCompany } = require('../middleware/companyAccess');
 
 const getActivities = async (req, res) => {
+  const { company_id, user_email } = req.query;
+
+  if (company_id) {
+    if (!await canAccessCompany(req.user.email, company_id))
+      return res.status(403).json({ message: 'Access denied' });
+  } else if (user_email) {
+    // Users may only read their own activity feed.
+    if (String(user_email).toLowerCase().trim() !== String(req.user.email).toLowerCase().trim())
+      return res.status(403).json({ message: 'Access denied' });
+  } else {
+    return res.status(400).json({ message: 'company_id or user_email required' });
+  }
+
   const filter = {};
-  if (req.query.company_id) filter.company_id = req.query.company_id;
-  if (req.query.user_email) filter.user_email = req.query.user_email;
+  if (company_id) filter.company_id = company_id;
+  if (user_email) filter.user_email = user_email;
   const limit = parseInt(req.query.limit) || 100;
   const activities = await Activity.find(filter).sort({ createdAt: -1 }).limit(limit);
   res.json(activities);
 };
 
 const createActivity = async (req, res) => {
+  const { company_id } = req.body;
+  if (company_id && !await canAccessCompany(req.user.email, company_id))
+    return res.status(403).json({ message: 'Access denied' });
   const activity = await Activity.create({ ...req.body, user_email: req.user.email });
   res.status(201).json(activity);
 };
@@ -17,6 +34,9 @@ const createActivity = async (req, res) => {
 const deleteCompanyActivities = async (req, res) => {
   try {
     const { company_id } = req.params;
+
+    if (!await canAccessCompany(req.user.email, company_id))
+      return res.status(403).json({ message: 'Access denied' });
 
     const result = await Activity.deleteMany({ company_id });
 

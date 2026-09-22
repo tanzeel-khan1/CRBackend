@@ -4,14 +4,14 @@ const { canAccessCompany } = require('../middleware/companyAccess');
 const getHpcs = async (req, res) => {
   try {
     const { company_id } = req.query;
-    if (company_id && !(await canAccessCompany(req.user.email, company_id))) {
+    if (!company_id) {
+      return res.status(400).json({ message: 'company_id required' });
+    }
+    if (!(await canAccessCompany(req.user.email, company_id))) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const filter = {};
-    if (company_id) filter.company_id = company_id;
-
-    const hpcs = await Hpc.find(filter).sort({ createdAt: -1 });
+    const hpcs = await Hpc.find({ company_id }).sort({ createdAt: -1 });
     res.json(hpcs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -21,7 +21,10 @@ const getHpcs = async (req, res) => {
 const createHpc = async (req, res) => {
   try {
     const { company_id } = req.body;
-    if (company_id && !(await canAccessCompany(req.user.email, company_id))) {
+    if (!company_id) {
+      return res.status(400).json({ message: 'company_id required' });
+    }
+    if (!(await canAccessCompany(req.user.email, company_id))) {
       return res.status(403).json({ message: 'Access denied' });
     }
 

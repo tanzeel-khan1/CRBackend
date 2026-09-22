@@ -7,13 +7,16 @@ const getInvestors = async (req, res) => {
   try {
     const { company_id } = req.query;
 
-    if (company_id && !await canAccessCompany(req.user.email, company_id)) {
+    if (!company_id) {
+      return res.status(400).json({ message: 'company_id required' });
+    }
+
+    if (!await canAccessCompany(req.user.email, company_id)) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const filter = {};
+    const filter = { company_id };
 
-    if (company_id) filter.company_id = company_id;
     if (req.query.user_email) filter.user_email = req.query.user_email.toLowerCase().trim();
     if (req.query.role) filter.role = req.query.role;
 
@@ -33,10 +36,11 @@ const createInvestor = async (req, res) => {
       data.user_email = data.user_email.toLowerCase().trim();
     }
 
-    if (
-      data.company_id &&
-      !(await canAccessCompany(req.user.email, data.company_id))
-    ) {
+    if (!data.company_id) {
+      return res.status(400).json({ message: 'company_id required' });
+    }
+
+    if (!(await canAccessCompany(req.user.email, data.company_id))) {
       return res.status(403).json({
         message: 'Access denied',
       });
