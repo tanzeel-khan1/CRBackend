@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
@@ -167,7 +167,10 @@ app.use("/api/events", require("./routes/eventRoutes"));
 app.use(errorHandler);
 
 const { startSubscriptionReminderJob } = require('./jobs/subscriptionReminderJob');
+const { startKeepAliveJob } = require('./jobs/keepAliveJob');
+
 startSubscriptionReminderJob();
+startKeepAliveJob();
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
