@@ -1,6 +1,7 @@
 const Document = require('../models/Document');
 const DocSection = require('../models/DocSection');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { respondWithError } = require('../utils/errorResponse');
 
 const getDocuments = async (req, res) => {
   const { company_id, is_personal } = req.query;
@@ -37,7 +38,7 @@ const createDocument = async (req, res) => {
     const doc = await Document.create({ ...data, created_by: req.user.email });
     res.status(201).json(doc);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -58,7 +59,7 @@ const updateDocument = async (req, res) => {
     const updated = await Document.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
     res.json(updated);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 

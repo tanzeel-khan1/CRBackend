@@ -2,6 +2,7 @@ const Investor = require('../models/Investor');
 const { canAccessCompany } = require('../middleware/companyAccess');
 const sendEmail = require('../utils/investorEmail');
 const Company = require('../models/Company'); // ADD
+const { respondWithError } = require('../utils/errorResponse');
 
 const getInvestors = async (req, res) => {
   try {
@@ -24,7 +25,7 @@ const getInvestors = async (req, res) => {
 
     res.json(investors);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -163,7 +164,7 @@ const updateInvestor = async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -183,7 +184,7 @@ const deleteInvestor = async (req, res) => {
 
     res.json({ message: 'Investor deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 

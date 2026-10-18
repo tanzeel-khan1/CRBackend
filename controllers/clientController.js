@@ -1,7 +1,7 @@
 const Client = require('../models/Client');
 const { canAccessCompany } = require('../middleware/companyAccess');
 
-const getClients = async (req, res) => {
+const getClients = async (req, res, next) => {
   try {
     const { company_id } = req.query;
 
@@ -12,11 +12,11 @@ const getClients = async (req, res) => {
     const clients = await Client.find({ company_id }).sort({ createdAt: -1 });
     res.json(clients);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-const createClient = async (req, res) => {
+const createClient = async (req, res, next) => {
   try {
     const data = { ...req.body };
 
@@ -33,11 +33,11 @@ const createClient = async (req, res) => {
 
     res.status(201).json(client);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    next(error);
   }
 };
 
-const updateClient = async (req, res) => {
+const updateClient = async (req, res, next) => {
   try {
     const client = await Client.findById(req.params.id);
 
@@ -59,11 +59,11 @@ const updateClient = async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    next(error);
   }
 };
 
-const deleteClient = async (req, res) => {
+const deleteClient = async (req, res, next) => {
   try {
     const client = await Client.findById(req.params.id);
 
@@ -76,7 +76,7 @@ const deleteClient = async (req, res) => {
     await Client.findByIdAndDelete(req.params.id);
     res.json({ message: 'Client deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 

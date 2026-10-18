@@ -1,4 +1,5 @@
 const Goal = require("../models/Goals");
+const { respondWithError } = require('../utils/errorResponse');
 
 // Create Goal
 const createGoal = async (req, res) => {
@@ -10,7 +11,7 @@ const createGoal = async (req, res) => {
 
     res.status(201).json(goal);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -20,7 +21,7 @@ const getGoals = async (req, res) => {
     const goals = await Goal.find({ userId: req.user.id });
     res.json(goals);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -38,7 +39,7 @@ const getGoalById = async (req, res) => {
 
     res.json(goal);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -57,7 +58,7 @@ const updateGoal = async (req, res) => {
 
     res.json(goal);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -75,7 +76,7 @@ const deleteGoal = async (req, res) => {
 
     res.json({ message: "Deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 

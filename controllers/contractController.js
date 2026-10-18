@@ -1,5 +1,6 @@
 const Contract = require('../models/Contract');
 const Company = require('../models/Company');
+const { respondWithError } = require('../utils/errorResponse');
 
 const isOwner = async (userEmail, companyId) => {
   const company = await Company.findById(companyId);
@@ -15,7 +16,7 @@ const getContracts = async (req, res) => {
     const contracts = await Contract.find({ company_id }).sort({ createdAt: -1 });
     res.json(contracts);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -28,7 +29,7 @@ const createContract = async (req, res) => {
     const contract = await Contract.create({ ...req.body, created_by: req.user.email });
     res.status(201).json(contract);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -41,7 +42,7 @@ const updateContract = async (req, res) => {
     const updated = await Contract.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     res.json(updated);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -54,7 +55,7 @@ const deleteContract = async (req, res) => {
     await Contract.findByIdAndDelete(req.params.id);
     res.json({ message: 'Contract deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 

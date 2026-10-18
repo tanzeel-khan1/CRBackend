@@ -1,5 +1,6 @@
 const Hpc = require('../models/Hpc');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { respondWithError } = require('../utils/errorResponse');
 
 const getHpcs = async (req, res) => {
   try {
@@ -14,7 +15,7 @@ const getHpcs = async (req, res) => {
     const hpcs = await Hpc.find({ company_id }).sort({ createdAt: -1 });
     res.json(hpcs);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -31,7 +32,7 @@ const createHpc = async (req, res) => {
     const hpc = await Hpc.create({ ...req.body, created_by: req.user.email });
     res.status(201).json(hpc);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -47,7 +48,7 @@ const updateHpc = async (req, res) => {
     const updated = await Hpc.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     res.json(updated);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -63,7 +64,7 @@ const deleteHpc = async (req, res) => {
     await Hpc.findByIdAndDelete(req.params.id);
     res.json({ message: 'HPC deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
