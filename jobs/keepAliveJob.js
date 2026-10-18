@@ -17,12 +17,12 @@ const startKeepAliveJob = () => {
   initialReq.on('error', () => {});
   initialReq.end();
 
-  // Har 5 minutes baad hit karo
+  // Har 6 ghante baad hit karo
   setInterval(() => {
     const req = client.get(pingUrl, () => {});
     req.on('error', () => {});
     req.end();
-  }, 5 * 60 * 1000);
+  }, 6 * 60 * 60 * 1000);
 };
 
 module.exports = { startKeepAliveJob };

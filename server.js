@@ -61,13 +61,7 @@ app.use('/api/auth', rateLimit({
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// const io = new Server(server, {
-//   cors: {
-//     origin: allowedOrigins,
-//     methods: ['GET', 'POST'],
-//     credentials: true
-//   }
-// });
+
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
