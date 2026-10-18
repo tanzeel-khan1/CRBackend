@@ -1,5 +1,6 @@
 const Step = require('../models/Step');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { respondWithError } = require('../utils/errorResponse');
 
 const getSteps = async (req, res) => {
   try {
@@ -10,7 +11,7 @@ const getSteps = async (req, res) => {
     const steps = await Step.find({ company_id }).sort({ step_number: 1 });
     res.json(steps);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    respondWithError(res, err);
   }
 };
 
@@ -29,7 +30,7 @@ const createStep = async (req, res) => {
     const step = await Step.create({ ...req.body, created_by: req.user.email });
     res.status(201).json(step);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    respondWithError(res, err);
   }
 };
 
@@ -42,7 +43,7 @@ const updateStep = async (req, res) => {
     const updated = await Step.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updated);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    respondWithError(res, err);
   }
 };
 
@@ -60,7 +61,7 @@ const deleteStep = async (req, res) => {
 
     res.json({ message: 'Step deleted' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    respondWithError(res, err);
   }
 };
 
@@ -73,7 +74,7 @@ const reorderSteps = async (req, res) => {
     await Promise.all(order.map(({ id, step_number }) => Step.findByIdAndUpdate(id, { step_number })));
     res.json({ message: 'Reordered' });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    respondWithError(res, err);
   }
 };
 

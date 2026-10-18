@@ -1,5 +1,6 @@
 const Investor = require('../models/Investor');
 const Contract = require('../models/Contract');
+const { respondWithError } = require('../utils/errorResponse');
 
 // Get pending invitations for the currently logged-in user
 const getMyInvitations = async (req, res) => {
@@ -11,7 +12,7 @@ const getMyInvitations = async (req, res) => {
     }).populate('contract_id').populate('company_id', 'name industry');
     res.json(invitations);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -58,7 +59,7 @@ const acceptInvitation = async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 // Reject an invitation
@@ -78,7 +79,7 @@ const rejectInvitation = async (req, res) => {
     );
     res.json(updated);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 

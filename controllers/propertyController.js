@@ -1,5 +1,6 @@
 const Property = require('../models/Property');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { respondWithError } = require('../utils/errorResponse');
 
 const hasCompanyAccess = (req, companyId) => canAccessCompany(req.user.email, companyId);
 
@@ -36,7 +37,7 @@ const getProperties = async (req, res) => {
 
     res.json(await Property.find(filter).sort({ createdAt: -1 }));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -58,7 +59,7 @@ const createProperty = async (req, res) => {
     const property = await Property.create(data);
     res.status(201).json(property);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -87,7 +88,7 @@ const updateProperty = async (req, res) => {
     });
     res.json(updated);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 
@@ -102,7 +103,7 @@ const deleteProperty = async (req, res) => {
     await Property.findByIdAndDelete(req.params.id);
     res.json({ message: 'Property deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    respondWithError(res, error);
   }
 };
 

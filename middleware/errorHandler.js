@@ -1,9 +1,8 @@
+const { respondWithError } = require('../utils/errorResponse');
+
 const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode).json({
-    message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-  });
+  if (res.headersSent) return next(err);
+  return respondWithError(res, err);
 };
 
 module.exports = errorHandler;
