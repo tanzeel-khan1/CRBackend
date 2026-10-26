@@ -40,6 +40,14 @@ emailOtpExpires: {
   type: Date,
   default: null,
 },
+passwordResetOtpHash: {
+  type: String,
+  default: null,
+},
+passwordResetOtpExpires: {
+  type: Date,
+  default: null,
+},
   authProvider: {
     type: String,
     enum: ['local', 'google'],
@@ -109,7 +117,16 @@ userSchema.methods.toJSON = function () {
   delete obj.password;
   delete obj.emailOtp;
   delete obj.emailOtpExpires;
+  delete obj.passwordResetOtpHash;
+  delete obj.passwordResetOtpExpires;
   return obj;
 };
 
 module.exports = mongoose.model('User', userSchema);
+
+
+
+
+
+
+

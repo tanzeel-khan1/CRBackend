@@ -28,7 +28,13 @@ npm run dev
 |--------|-------|-------------|
 | POST | `/api/auth/register` | Register new user |
 | POST | `/api/auth/login` | Login |
+| POST | `/api/auth/forgot-password` | Email a password reset OTP |
+| POST | `/api/auth/reset-password` | Reset password using the email OTP |
 | GET  | `/api/auth/me` | Get current user (protected) |
+
+Password reset email delivery uses the same SMTP settings as other email features:
+`SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, and `EMAIL_USER` / `EMAIL_PASS` (or
+`SMTP_USER` / `SMTP_PASS`).
 
 ### Companies
 | Method | Route | Description |
