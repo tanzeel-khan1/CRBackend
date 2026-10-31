@@ -8,4 +8,4 @@ router.route('/').get(getActivities).post(createActivity);
 
 router.delete('/company/:company_id', deleteCompanyActivities);
 
-module.exports = router;                   
+module.exports = router;                  
