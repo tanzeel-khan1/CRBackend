@@ -20,6 +20,7 @@ npm run dev
 | `JWT_SECRET` | Secret for signing JWTs | _(required)_ |
 | `PORT` | Port to listen on | `5000` |
 | `FRONTEND_URL` | CORS allowed origin | `http://localhost:5173` |
+| `PLATFORM_ADMIN_EMAILS` | Comma-separated platform administrator emails for moderation access | _(optional)_ |
 
 ## API Endpoints
 
@@ -67,6 +68,24 @@ Password reset email delivery uses the same SMTP settings as other email feature
 | GET/POST/PUT/DELETE | `/api/doc-sections[/:id]` | Doc sections |
 | GET/POST/PUT/DELETE | `/api/hpcs[/:id]` | Company-scoped HPC initiatives |
 | POST | `/api/upload` | Upload file (returns `{ file_url }`) |
+| GET/POST | `/api/feedback/public/:token` | Read client feedback form / submit feedback without an account |
+| GET | `/api/feedback/public/company/:companyId` | List approved public feedback for a company |
+| GET | `/api/feedback/admin/pending` | List feedback awaiting review (platform admin) |
+| PATCH | `/api/feedback/admin/:id/status` | Approve or reject feedback (platform admin) |
+| GET | `/api/trash` | List the signed-in user's soft-deleted items |
+| POST | `/api/trash/:resource/:id/restore` | Restore an item from Trash |
+| DELETE | `/api/trash/:resource/:id` | Permanently delete an item from Trash |
+
+### Soft Delete
+
+Delete actions move supported records to Trash instead of removing them immediately.
+Active application queries automatically exclude trashed records. Users can restore
+their own deleted records or permanently delete them from Trash. Permanently deleting
+a company also removes its related records.
+
+Before deploying, run `npm run migrate:soft-delete` once against the production
+database. This updates the Business Plan unique index so a deleted section does not
+block creating a replacement. Back up the database before running migrations.
 
 ### File Uploads
 Files are stored in `backend/uploads/` and served at `/uploads/<filename>`.

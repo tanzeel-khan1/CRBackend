@@ -1,6 +1,7 @@
 const Property = require('../models/Property');
 const { canAccessCompany } = require('../middleware/companyAccess');
 const { respondWithError } = require('../utils/errorResponse');
+const { softDeleteById } = require('../utils/softDelete');
 
 const hasCompanyAccess = (req, companyId) => canAccessCompany(req.user.email, companyId);
 
@@ -100,7 +101,7 @@ const deleteProperty = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    await Property.findByIdAndDelete(req.params.id);
+    await softDeleteById(Property, req.params.id, req.user.email);
     res.json({ message: 'Property deleted' });
   } catch (error) {
     respondWithError(res, error);

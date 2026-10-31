@@ -3,6 +3,7 @@ const { canAccessCompany } = require('../middleware/companyAccess');
 const sendEmail = require('../utils/investorEmail');
 const Company = require('../models/Company'); // ADD
 const { respondWithError } = require('../utils/errorResponse');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getInvestors = async (req, res) => {
   try {
@@ -180,7 +181,7 @@ const deleteInvestor = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    await Investor.findByIdAndDelete(req.params.id);
+    await softDeleteById(Investor, req.params.id, req.user.email);
 
     res.json({ message: 'Investor deleted' });
   } catch (error) {

@@ -1,4 +1,5 @@
 const BusinessPlan = require('../models/BusinessPlan');
+const { softDeleteById } = require('../utils/softDelete');
 const { canAccessCompany } = require('../middleware/companyAccess');
 
 const getSections = async (req, res) => {
@@ -38,7 +39,7 @@ const deleteSection = async (req, res) => {
   if (!section) return res.status(404).json({ message: 'Section not found' });
   if (!await canAccessCompany(req.user.email, section.company_id.toString()))
     return res.status(403).json({ message: 'Access denied' });
-  await BusinessPlan.findByIdAndDelete(req.params.id);
+  await softDeleteById(BusinessPlan, req.params.id, req.user.email);
   res.json({ message: 'Section deleted' });
 };
 

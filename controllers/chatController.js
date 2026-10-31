@@ -1,5 +1,6 @@
 const ChatMessage = require('../models/ChatMessage');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { softDeleteById } = require('../utils/softDelete');
 
 // DM room keys are built in the frontend as `dm_<emailA>__<emailB>` (sorted).
 function hasDMAccess(userEmail, roomKey) {
@@ -51,7 +52,7 @@ const deleteMessage = async (req, res) => {
   if (!await canAccessRoom(req.user.email, message.company_id))
     return res.status(403).json({ message: 'Access denied' });
 
-  await ChatMessage.findByIdAndDelete(req.params.id);
+  await softDeleteById(ChatMessage, req.params.id, req.user.email);
   res.json({ message: 'Message deleted' });
 };
 

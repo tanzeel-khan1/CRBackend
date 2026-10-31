@@ -1,4 +1,5 @@
 const Event = require("../models/Event");
+const { softDeleteById } = require('../utils/softDelete');
 // =======================
 // GET ALL EVENTS
 // =======================
@@ -140,7 +141,7 @@ exports.deleteEvent = async (req, res) => {
   try {
 
 
-    const event = await Event.findByIdAndDelete(req.params.id);
+    const event = await softDeleteById(Event, req.params.id, req.user.email);
 
 
     if (!event) {

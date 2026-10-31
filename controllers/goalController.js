@@ -1,5 +1,6 @@
 const Goal = require("../models/Goals");
 const { respondWithError } = require('../utils/errorResponse');
+const { softDeleteOne } = require('../utils/softDelete');
 
 // Create Goal
 const createGoal = async (req, res) => {
@@ -65,10 +66,10 @@ const updateGoal = async (req, res) => {
 // Delete goal
 const deleteGoal = async (req, res) => {
   try {
-    const goal = await Goal.findOneAndDelete({
+    const goal = await softDeleteOne(Goal, {
       _id: req.params.id,
       userId: req.user.id,
-    });
+    }, req.user.email);
 
     if (!goal) {
       return res.status(404).json({ message: "Goal not found" });

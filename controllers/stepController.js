@@ -1,6 +1,7 @@
 const Step = require('../models/Step');
 const { canAccessCompany } = require('../middleware/companyAccess');
 const { respondWithError } = require('../utils/errorResponse');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getSteps = async (req, res) => {
   try {
@@ -53,7 +54,7 @@ const deleteStep = async (req, res) => {
     if (!step) return res.status(404).json({ message: 'Step not found' });
     if (!await canAccessCompany(req.user.email, step.company_id.toString()))
       return res.status(403).json({ message: 'Access denied' });
-    await Step.findByIdAndDelete(req.params.id);
+    await softDeleteById(Step, req.params.id, req.user.email);
 
     // Re-number remaining steps
     const remaining = await Step.find({ company_id: step.company_id }).sort({ step_number: 1 });

@@ -10,6 +10,9 @@ const businessPlanSchema = new mongoose.Schema({
   created_by: { type: String },
 }, { timestamps: true });
 
-businessPlanSchema.index({ company_id: 1, section_type: 1 }, { unique: true });
+businessPlanSchema.index(
+  { company_id: 1, section_type: 1 },
+  { unique: true, partialFilterExpression: { deleted_at: null } }
+);
 
 module.exports = mongoose.model('BusinessPlan', businessPlanSchema);

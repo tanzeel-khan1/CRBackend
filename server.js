@@ -138,6 +138,8 @@ app.use('/api/expenses', require('./routes/expenseRoutes'));
 app.use('/api/invoices', require('./routes/invoiceRoutes'));
 app.use('/api/investors', require('./routes/investorRoutes'));
 app.use('/api/clients', require('./routes/clientRoutes'));
+app.use('/api/feedback', require('./routes/feedbackRoutes'));
+app.use('/api/trash', require('./routes/trashRoutes'));
 app.use('/api/properties', require('./routes/propertyRoutes'));
 app.use('/api/employees', require('./routes/employeeRoutes'));
 app.use('/api/notes', require('./routes/noteRoutes'));

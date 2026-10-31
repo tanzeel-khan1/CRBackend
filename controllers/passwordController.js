@@ -1,6 +1,7 @@
 const Password = require('../models/Password');
 const { canAccessCompany } = require('../middleware/companyAccess');
 const { encrypt, decrypt } = require('../utils/encrypt');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getPasswords = async (req, res) => {
   const { company_id } = req.query;
@@ -63,7 +64,7 @@ const deletePassword = async (req, res) => {
   if (!await canAccessCompany(req.user.email, password.company_id?.toString()))
     return res.status(403).json({ message: 'Access denied' });
 
-  await Password.findByIdAndDelete(req.params.id);
+  await softDeleteById(Password, req.params.id, req.user.email);
   res.json({ message: 'Password deleted' });
 };
 
