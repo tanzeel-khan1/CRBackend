@@ -1,6 +1,7 @@
 const Hpc = require('../models/Hpc');
 const { canAccessCompany } = require('../middleware/companyAccess');
 const { respondWithError } = require('../utils/errorResponse');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getHpcs = async (req, res) => {
   try {
@@ -61,7 +62,7 @@ const deleteHpc = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    await Hpc.findByIdAndDelete(req.params.id);
+    await softDeleteById(Hpc, req.params.id, req.user.email);
     res.json({ message: 'HPC deleted' });
   } catch (error) {
     respondWithError(res, error);

@@ -1,5 +1,6 @@
 const Employee = require('../models/Employee');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getEmployees = async (req, res) => {
   const { company_id } = req.query;
@@ -33,7 +34,7 @@ const deleteEmployee = async (req, res) => {
   if (!employee) return res.status(404).json({ message: 'Employee not found' });
   if (!await canAccessCompany(req.user.email, employee.company_id?.toString()))
     return res.status(403).json({ message: 'Access denied' });
-  await Employee.findByIdAndDelete(req.params.id);
+  await softDeleteById(Employee, req.params.id, req.user.email);
   res.json({ message: 'Employee deleted' });
 };
 

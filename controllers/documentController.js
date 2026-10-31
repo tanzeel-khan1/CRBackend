@@ -2,6 +2,7 @@ const Document = require('../models/Document');
 const DocSection = require('../models/DocSection');
 const { canAccessCompany } = require('../middleware/companyAccess');
 const { respondWithError } = require('../utils/errorResponse');
+const { softDeleteById, softDeleteMany } = require('../utils/softDelete');
 
 const getDocuments = async (req, res) => {
   const { company_id, is_personal } = req.query;
@@ -74,7 +75,7 @@ const deleteDocument = async (req, res) => {
     return res.status(403).json({ message: 'Access denied' });
   }
 
-  await Document.findByIdAndDelete(req.params.id);
+  await softDeleteById(Document, req.params.id, req.user.email);
   res.json({ message: 'Document deleted' });
 };
 
@@ -110,8 +111,8 @@ const deleteSection = async (req, res) => {
   if (!section) return res.status(404).json({ message: 'Section not found' });
   if (!await canAccessCompany(req.user.email, section.company_id?.toString()))
     return res.status(403).json({ message: 'Access denied' });
-  await DocSection.findByIdAndDelete(req.params.id);
-  await Document.deleteMany({ section_id: req.params.id });
+  await softDeleteById(DocSection, req.params.id, req.user.email);
+  await softDeleteMany(Document, { section_id: req.params.id }, req.user.email);
   res.json({ message: 'Section deleted' });
 };
 

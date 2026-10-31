@@ -124,6 +124,8 @@
 // };
 const jwt = require('jsonwebtoken');
 const ChatMessage = require('../models/ChatMessage');
+const User = require('../models/User');
+const { softDeleteById } = require('../utils/softDelete');
 
 module.exports = (io) => {
 
@@ -233,7 +235,8 @@ module.exports = (io) => {
 
         try {
 
-          await ChatMessage.findByIdAndDelete(messageId);
+          const user = await User.findById(socket.user?.id);
+          await softDeleteById(ChatMessage, messageId, user?.email);
 
           io.to(company_id)
             .emit('message_deleted', messageId);

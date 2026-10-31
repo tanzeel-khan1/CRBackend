@@ -41,6 +41,11 @@ const clientSchema = new mongoose.Schema(
     created_by: {
       type: String,
     },
+    feedback_token: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
   },
   { timestamps: true }
 );

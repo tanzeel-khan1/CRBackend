@@ -1,6 +1,7 @@
 const Idea = require('../models/Idea');
 const IdeaComment = require('../models/IdeaComment');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { softDeleteById, softDeleteMany } = require('../utils/softDelete');
 
 const getIdeas = async (req, res) => {
   const { company_id } = req.query;
@@ -34,8 +35,8 @@ const deleteIdea = async (req, res) => {
   if (!idea) return res.status(404).json({ message: 'Idea not found' });
   if (!await canAccessCompany(req.user.email, idea.company_id?.toString()))
     return res.status(403).json({ message: 'Access denied' });
-  await Idea.findByIdAndDelete(req.params.id);
-  await IdeaComment.deleteMany({ idea_id: req.params.id });
+  await softDeleteById(Idea, req.params.id, req.user.email);
+  await softDeleteMany(IdeaComment, { idea_id: req.params.id }, req.user.email);
   res.json({ message: 'Idea deleted' });
 };
 

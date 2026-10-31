@@ -1,5 +1,6 @@
 const Expense = require('../models/Expense');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getExpenses = async (req, res) => {
   const { company_id } = req.query;
@@ -33,7 +34,7 @@ const deleteExpense = async (req, res) => {
   if (!expense) return res.status(404).json({ message: 'Expense not found' });
   if (!await canAccessCompany(req.user.email, expense.company_id?.toString()))
     return res.status(403).json({ message: 'Access denied' });
-  await Expense.findByIdAndDelete(req.params.id);
+  await softDeleteById(Expense, req.params.id, req.user.email);
   res.json({ message: 'Expense deleted' });
 };
 

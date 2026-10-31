@@ -1,4 +1,5 @@
 const Contract = require('../models/Contract');
+const { softDeleteById } = require('../utils/softDelete');
 const Company = require('../models/Company');
 const { respondWithError } = require('../utils/errorResponse');
 
@@ -52,7 +53,7 @@ const deleteContract = async (req, res) => {
     if (!contract) return res.status(404).json({ message: 'Contract not found' });
     if (!await isOwner(req.user.email, contract.company_id?.toString()))
       return res.status(403).json({ message: 'Only company owner can delete contracts' });
-    await Contract.findByIdAndDelete(req.params.id);
+    await softDeleteById(Contract, req.params.id, req.user.email);
     res.json({ message: 'Contract deleted' });
   } catch (error) {
     respondWithError(res, error);

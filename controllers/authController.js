@@ -188,7 +188,13 @@ const googleLogin = async (req, res) => {
 };
 // GET /api/auth/me
 const getMe = async (req, res) => {
-  res.json(req.user);
+  const user = req.user.toJSON();
+  const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  if (platformAdmins.includes(req.user.email.toLowerCase())) user.role = 'admin';
+  res.json(user);
 };
 
 // PUT /api/auth/profile

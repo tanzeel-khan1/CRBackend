@@ -1,5 +1,6 @@
 const Note = require('../models/Note');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getNotes = async (req, res) => {
   const { company_id, is_personal } = req.query;
@@ -58,7 +59,7 @@ const deleteNote = async (req, res) => {
     return res.status(403).json({ message: 'Access denied' });
   }
 
-  await Note.findByIdAndDelete(req.params.id);
+  await softDeleteById(Note, req.params.id, req.user.email);
   res.json({ message: 'Note deleted' });
 };
 

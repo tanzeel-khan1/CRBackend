@@ -1,5 +1,6 @@
 const Invoice = require('../models/Invoice');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getInvoices = async (req, res) => {
   const { company_id } = req.query;
@@ -33,7 +34,7 @@ const deleteInvoice = async (req, res) => {
   if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
   if (!await canAccessCompany(req.user.email, invoice.company_id?.toString()))
     return res.status(403).json({ message: 'Access denied' });
-  await Invoice.findByIdAndDelete(req.params.id);
+  await softDeleteById(Invoice, req.params.id, req.user.email);
   res.json({ message: 'Invoice deleted' });
 };
 

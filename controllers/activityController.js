@@ -1,5 +1,6 @@
 const Activity = require('../models/Activity');
 const { canAccessCompany } = require('../middleware/companyAccess');
+const { softDeleteMany } = require('../utils/softDelete');
 
 const getActivities = async (req, res) => {
   const { company_id, user_email } = req.query;
@@ -38,11 +39,11 @@ const deleteCompanyActivities = async (req, res) => {
     if (!await canAccessCompany(req.user.email, company_id))
       return res.status(403).json({ message: 'Access denied' });
 
-    const result = await Activity.deleteMany({ company_id });
+    const result = await softDeleteMany(Activity, { company_id }, req.user.email);
 
     res.status(200).json({
       success: true,
-      deletedCount: result.deletedCount,
+      deletedCount: result.modifiedCount,
       message: 'Company activities deleted successfully',
     });
   } catch (error) {

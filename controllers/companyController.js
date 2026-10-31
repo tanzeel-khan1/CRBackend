@@ -1,6 +1,7 @@
 const Company = require('../models/Company');
 const Investor = require('../models/Investor');
 const sendCompanyWelcomeEmail = require('../utils/sendCompanyWelcomeEmail');
+const { softDeleteById } = require('../utils/softDelete');
 
 const getCompanies = async (req, res) => {
   const userEmail = req.user.email.toLowerCase().trim();
@@ -61,8 +62,12 @@ const updateCompany = async (req, res) => {
 };
 
 const deleteCompany = async (req, res) => {
-  const company = await Company.findByIdAndDelete(req.params.id);
+  const company = await Company.findById(req.params.id);
   if (!company) return res.status(404).json({ message: 'Company not found' });
+  if (company.created_by?.toLowerCase().trim() !== req.user.email.toLowerCase().trim()) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+  await softDeleteById(Company, req.params.id, req.user.email);
   res.json({ message: 'Company deleted' });
 };
 
