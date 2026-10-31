@@ -1,0 +1,18 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "checkk",
+    "main",
+    "test"
+  ],
+  "parent": {
+    "checkk": "main",
+    "main": null,
+    "test": "main"
+  },
+  "order": [
+    "main",
+    "checkk",
+    "test"
+  ]
+}
