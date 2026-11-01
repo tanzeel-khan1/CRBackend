@@ -10,10 +10,10 @@ const multer = require('multer');
 const fs = require('fs');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const notFound = require('./middleware/notFound');
 
 dotenv.config();
 const { cloudinary, documentStorage } = require('./config/cloudinaryConfig');
-connectDB();
 
 const app = express();
 const server = http.createServer(app);
@@ -21,6 +21,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'https://ranvola.netlify.app',
   'http://localhost:7000',
+  'http://localhost:7001',
   'https://app.tanzilbuilds.xyz'
 ];
 
@@ -75,6 +76,7 @@ require('./socket/chatSocket')(io);
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
+app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
 
 // File upload
 const upload = multer({
@@ -133,6 +135,7 @@ app.get('/', (req, res) => {
 
 // REST routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/companies', require('./routes/companyRoutes'));
 app.use('/api/expenses', require('./routes/expenseRoutes'));
 app.use('/api/invoices', require('./routes/invoiceRoutes'));
@@ -160,13 +163,21 @@ app.use('/api/billing',       require('./routes/billingRoutes'));
 app.use('/api/goals',       require('./routes/goalRoutes'));
 app.use('/api/hpcs',        require('./routes/hpcRoutes'));
 app.use("/api/events", require("./routes/eventRoutes"));
+app.use(notFound);
 app.use(errorHandler);
 
 const { startSubscriptionReminderJob } = require('./jobs/subscriptionReminderJob');
 const { startKeepAliveJob } = require('./jobs/keepAliveJob');
 
-startSubscriptionReminderJob();
-startKeepAliveJob();
-
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const startServer = async () => {
+  await connectDB();
+  startSubscriptionReminderJob();
+  startKeepAliveJob();
+  server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+};
+
+startServer().catch((error) => {
+  console.error('Server startup failed:', error);
+  process.exitCode = 1;
+});

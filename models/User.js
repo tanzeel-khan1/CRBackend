@@ -92,6 +92,11 @@ subscription: {
     type: String,
     default: null,
   },
+  adminGrantedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
   currentPeriodStart: {
     type: Date,
     default: null,
@@ -128,7 +133,6 @@ userSchema.methods.toJSON = function () {
 };
 
 module.exports = mongoose.model('User', userSchema);
-
 
 
 

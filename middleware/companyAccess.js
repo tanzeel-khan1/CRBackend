@@ -22,7 +22,6 @@ async function canAccessCompany(userEmail, companyId) {
     user_email: email,
     invitation_status: { $in: ['accepted', null] },
   });
-  console.log('canAccessCompany check:', { email, companyId, found: !!investor, investor });
 
   return !!investor;
 }

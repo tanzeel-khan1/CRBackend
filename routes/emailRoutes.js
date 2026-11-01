@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 const createMailer = require('../utils/mailer');
 
 const escapeHtml = (value = '') => String(value)
@@ -18,7 +19,7 @@ const formatDate = (value) => {
     : date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 };
 
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, asyncHandler(async (req, res) => {
   const { to, subject, body, file_url, file_name, invoice } = req.body;
   if (!to) return res.status(400).json({ message: 'Recipient email is required' });
 
@@ -75,6 +76,6 @@ router.post('/', protect, async (req, res) => {
     console.error('Document email failed:', error.message);
     res.status(503).json({ message: 'Email service is temporarily unavailable.' });
   }
-});
+}));
 
 module.exports = router;

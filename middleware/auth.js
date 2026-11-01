@@ -31,10 +31,10 @@ const adminOnly = (req, res, next) => {
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
-  if (
-    req.user
-    && (req.user.role === 'admin' || platformAdmins.includes(req.user.email.toLowerCase()))
-  ) return next();
+  if (!req.user?.isEmailVerified) {
+    return res.status(403).json({ message: 'Verify your email address before accessing admin features' });
+  }
+  if (req.user.role === 'admin' || platformAdmins.includes(req.user.email.toLowerCase())) return next();
   res.status(403).json({ message: 'Admin access required' });
 };
 

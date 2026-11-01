@@ -1,23 +1,11 @@
-const jwt = require("jsonwebtoken");
 const stripe = require("../config/stripe");
 const User = require("../models/User");
 
-const getUserIdFromToken = (req) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-
-  const token = authHeader.split(" ")[1];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-  return decoded.id || decoded._id || decoded.userId;
-};
+const getAuthenticatedUserId = (req) => req.user?._id?.toString() || null;
 
 const createCheckoutSession = async (req, res) => {
   try {
-    const userId = getUserIdFromToken(req);
+    const userId = getAuthenticatedUserId(req);
 
     if (!userId) {
       return res.status(401).json({
@@ -82,6 +70,7 @@ const createCheckoutSession = async (req, res) => {
       stripeSubscriptionId: null,
       stripePriceId: process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID,
       stripeCheckoutSessionId: session.id,
+      adminGrantedBy: null,
       currentPeriodEnd: null,
     };
 
@@ -109,7 +98,7 @@ const verifyCheckoutSession = async (req, res) => {
       });
     }
 
-    const userId = getUserIdFromToken(req);
+    const userId = getAuthenticatedUserId(req);
 
     if (!userId) {
       return res.status(401).json({
@@ -209,6 +198,7 @@ if (subItem?.current_period_end) {
           stripeSubscriptionId: subscriptionId,
           stripePriceId,
           stripeCheckoutSessionId: session.id,
+          adminGrantedBy: null,
           currentPeriodStart,
           currentPeriodEnd,
           expiryReminderSentFor: null,
@@ -239,14 +229,13 @@ if (subItem?.current_period_end) {
 
     return res.status(500).json({
       message: "Subscription could not be verified",
-      error: error.message,
     });
   }
 };
 
 const getUserSubscriptionById = async (req, res) => {
   try {
-    const loggedInUserId = getUserIdFromToken(req);
+    const loggedInUserId = getAuthenticatedUserId(req);
     const { userId } = req.params;
 
     if (!loggedInUserId) {
@@ -378,14 +367,13 @@ const getUserSubscriptionById = async (req, res) => {
 
     return res.status(500).json({
       message: "User subscription could not be loaded",
-      error: error.message,
     });
   }
 };
 
 const getBillingOverview = async (req, res) => {
   try {
-    const userId = getUserIdFromToken(req);
+    const userId = getAuthenticatedUserId(req);
 
     if (!userId) {
       return res.status(401).json({ message: "Token missing or invalid" });
@@ -510,14 +498,13 @@ const getBillingOverview = async (req, res) => {
     console.error("Get billing overview error:", error);
     return res.status(500).json({
       message: "Billing overview could not be loaded",
-      error: error.message,
     });
   }
 };
 
 const createPortalSession = async (req, res) => {
   try {
-    const userId = getUserIdFromToken(req);
+    const userId = getAuthenticatedUserId(req);
 
     if (!userId) {
       return res.status(401).json({ message: "Token missing or invalid" });
@@ -543,14 +530,13 @@ const createPortalSession = async (req, res) => {
     console.error("Create portal session error:", error);
     return res.status(500).json({
       message: "Billing portal session could not be created",
-      error: error.message,
     });
   }
 };
 
 const cancelSubscription = async (req, res) => {
   try {
-    const userId = getUserIdFromToken(req);
+    const userId = getAuthenticatedUserId(req);
 
     if (!userId) {
       return res.status(401).json({ message: "Token missing or invalid" });
@@ -589,7 +575,6 @@ const cancelSubscription = async (req, res) => {
     console.error("Cancel subscription error:", error);
     return res.status(500).json({
       message: "Subscription could not be cancelled",
-      error: error.message,
     });
   }
 };

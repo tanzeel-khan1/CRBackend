@@ -1,4 +1,6 @@
 const express = require("express");
+const asyncHandler = require("../middleware/asyncHandler");
+const { protect } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -12,27 +14,28 @@ const {
     getEventsByCompany,
 } = require("../controllers/eventController");
 
+router.use(protect);
 
-router.get("/company/:companyId", getEventsByCompany);
+router.get("/company/:companyId", asyncHandler(getEventsByCompany));
 
 // GET ALL EVENTS
-router.get("/", getAllEvents);
+router.get("/", asyncHandler(getAllEvents));
 
 
 // GET SINGLE EVENT
-router.get("/:id", getEventById);
+router.get("/:id", asyncHandler(getEventById));
 
 
 // CREATE EVENT
-router.post("/", createEvent);
+router.post("/", asyncHandler(createEvent));
 
 
 // UPDATE EVENT
-router.put("/:id", updateEvent);
+router.put("/:id", asyncHandler(updateEvent));
 
 
 // DELETE EVENT
-router.delete("/:id", deleteEvent);
+router.delete("/:id", asyncHandler(deleteEvent));
 
 
 

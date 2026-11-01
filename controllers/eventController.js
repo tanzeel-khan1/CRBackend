@@ -1,215 +1,128 @@
 const Event = require("../models/Event");
+const mongoose = require('mongoose');
+const { canAccessCompany } = require('../middleware/companyAccess');
 const { softDeleteById } = require('../utils/softDelete');
-// =======================
-// GET ALL EVENTS
-// =======================
+
+const EVENT_FIELDS = [
+  'title',
+  'type',
+  'description',
+  'date',
+  'startTime',
+  'endTime',
+  'mode',
+  'meetingLink',
+  'location',
+  'attendees',
+  'reminder',
+  'status',
+];
+
+const pickEventFields = (body) => Object.fromEntries(
+  EVENT_FIELDS
+    .filter((field) => Object.prototype.hasOwnProperty.call(body || {}, field))
+    .map((field) => [field, body[field]])
+);
+
+const populateEventCompany = (query) => query.populate('company', 'name');
+
+const getEventForCompanyMember = async (eventId, userEmail) => {
+  const event = await Event.findById(eventId);
+  if (!event) return { event: null, allowed: false };
+
+  const allowed = await canAccessCompany(userEmail, event.company.toString());
+  return { event, allowed };
+};
+
 exports.getAllEvents = async (req, res) => {
-  try {
-    const events = await Event.find()
-      .populate("company", "name")
-      .populate("createdBy", "name email")
-      .populate("attendees", "name email")
-      .sort({ date: 1 });
-
-    res.status(200).json({
-      success: true,
-      count: events.length,
-      data: events,
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+  const { company_id: companyId } = req.query;
+  if (!mongoose.isValidObjectId(companyId)) {
+    return res.status(400).json({ success: false, message: 'A valid company_id is required' });
   }
+  if (!await canAccessCompany(req.user.email, companyId)) {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+
+  const events = await populateEventCompany(Event.find({ company: companyId }))
+    .sort({ date: 1 });
+  return res.json({ success: true, count: events.length, data: events });
 };
 
-
-// =======================
-// GET SINGLE EVENT
-// =======================
 exports.getEventById = async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.id)
-      .populate("company", "name")
-      .populate("createdBy", "name email")
-      .populate("attendees", "name email");
-
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
-    }
-
-
-    res.status(200).json({
-      success: true,
-      data: event,
-    });
-
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json({ success: false, message: 'Invalid event ID' });
   }
+
+  const { event, allowed } = await getEventForCompanyMember(req.params.id, req.user.email);
+  if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+  if (!allowed) return res.status(403).json({ success: false, message: 'Access denied' });
+
+  await event.populate('company', 'name');
+  return res.json({ success: true, data: event });
 };
 
-
-
-// =======================
-// CREATE EVENT
-// =======================
 exports.createEvent = async (req, res) => {
-  try {
-
-    const event = await Event.create(req.body);
-
-
-    res.status(201).json({
-      success: true,
-      message: "Event created successfully",
-      data: event,
-    });
-
-
-  } catch (error) {
-
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-
+  const companyId = req.body.company;
+  if (!mongoose.isValidObjectId(companyId)) {
+    return res.status(400).json({ success: false, message: 'A valid company is required' });
   }
+  if (!await canAccessCompany(req.user.email, companyId)) {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+
+  const event = await Event.create({
+    ...pickEventFields(req.body),
+    company: companyId,
+    createdBy: req.user._id,
+  });
+  return res.status(201).json({
+    success: true,
+    message: 'Event created successfully',
+    data: event,
+  });
 };
 
-
-
-// =======================
-// UPDATE EVENT
-// =======================
 exports.updateEvent = async (req, res) => {
-  try {
-
-
-    const event = await Event.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
-    }
-
-
-    res.status(200).json({
-      success: true,
-      message: "Event updated successfully",
-      data: event,
-    });
-
-
-  } catch (error) {
-
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json({ success: false, message: 'Invalid event ID' });
   }
+
+  const { event, allowed } = await getEventForCompanyMember(req.params.id, req.user.email);
+  if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+  if (!allowed) return res.status(403).json({ success: false, message: 'Access denied' });
+
+  Object.assign(event, pickEventFields(req.body));
+  await event.save();
+  return res.json({
+    success: true,
+    message: 'Event updated successfully',
+    data: event,
+  });
 };
 
-
-
-
-// =======================
-// DELETE EVENT
-// =======================
 exports.deleteEvent = async (req, res) => {
-  try {
-
-
-    const event = await softDeleteById(Event, req.params.id, req.user.email);
-
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
-    }
-
-
-    res.status(200).json({
-      success: true,
-      message: "Event deleted successfully",
-    });
-
-
-  } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json({ success: false, message: 'Invalid event ID' });
   }
+
+  const { event, allowed } = await getEventForCompanyMember(req.params.id, req.user.email);
+  if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+  if (!allowed) return res.status(403).json({ success: false, message: 'Access denied' });
+
+  await softDeleteById(Event, req.params.id, req.user.email);
+  return res.json({ success: true, message: 'Event deleted successfully' });
 };
 
-// =======================
-// GET EVENTS BY COMPANY ID
-// =======================
 exports.getEventsByCompany = async (req, res) => {
-  try {
-
-    const { companyId } = req.params;
-
-
-    if (!companyId) {
-      return res.status(400).json({
-        success: false,
-        message: "Company ID is required",
-      });
-    }
-
-
-
-    const events = await Event.find({
-      company: companyId,
-    })
-      .populate("company", "name")
-      .populate("createdBy", "name email")
-      .populate("attendees", "name email")
-      .sort({ date: 1 });
-
-
-
-    res.status(200).json({
-      success: true,
-      count: events.length,
-      data: events,
-    });
-
-
-
-  } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+  const { companyId } = req.params;
+  if (!mongoose.isValidObjectId(companyId)) {
+    return res.status(400).json({ success: false, message: 'Invalid company ID' });
   }
+  if (!await canAccessCompany(req.user.email, companyId)) {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+
+  const events = await populateEventCompany(Event.find({ company: companyId }))
+    .sort({ date: 1 });
+  return res.json({ success: true, count: events.length, data: events });
 };

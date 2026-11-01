@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 const { getProperties, createProperty, updateProperty, deleteProperty } = require('../controllers/propertyController');
 const multer = require('multer');
 const { propertyImageStorage } = require('../config/cloudinaryConfig');
@@ -23,7 +24,7 @@ const handlePropertyPhotoUpload = (req, res, next) => {
 };
 
 router.use(protect);
-router.route('/').get(getProperties).post(handlePropertyPhotoUpload, createProperty);
-router.route('/:id').put(handlePropertyPhotoUpload, updateProperty).delete(deleteProperty);
+router.route('/').get(asyncHandler(getProperties)).post(handlePropertyPhotoUpload, asyncHandler(createProperty));
+router.route('/:id').put(handlePropertyPhotoUpload, asyncHandler(updateProperty)).delete(asyncHandler(deleteProperty));
 
 module.exports = router;

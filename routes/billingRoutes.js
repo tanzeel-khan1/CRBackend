@@ -1,4 +1,6 @@
 const express = require("express");
+const { protect } = require("../middleware/auth");
+const asyncHandler = require("../middleware/asyncHandler");
 
 const {
   createCheckoutSession,
@@ -11,15 +13,16 @@ const {
 
 const router = express.Router();
 
-router.post("/checkout", createCheckoutSession);
-router.post("/verify-session", verifyCheckoutSession);
-router.get("/subscription/:userId", getUserSubscriptionById);
-router.get("/overview", getBillingOverview);
-router.post("/portal", createPortalSession);
-router.post("/cancel", cancelSubscription);
-
 router.get("/test", (req, res) => {
   res.json({ message: "Billing route working" });
 });
+
+router.use(protect);
+router.post("/checkout", asyncHandler(createCheckoutSession));
+router.post("/verify-session", asyncHandler(verifyCheckoutSession));
+router.get("/subscription/:userId", asyncHandler(getUserSubscriptionById));
+router.get("/overview", asyncHandler(getBillingOverview));
+router.post("/portal", asyncHandler(createPortalSession));
+router.post("/cancel", asyncHandler(cancelSubscription));
 
 module.exports = router;

@@ -50,8 +50,29 @@ const shouldSendReminder = (user) => {
   return true;
 };
 
+const expireManualSubscriptions = async () => {
+  const result = await User.updateMany(
+    {
+      'subscription.adminGrantedBy': { $ne: null },
+      'subscription.stripeSubscriptionId': null,
+      'subscription.status': 'active',
+      'subscription.currentPeriodEnd': { $lte: new Date() },
+    },
+    {
+      $set: {
+        'subscription.status': 'inactive',
+        'subscription.plan': 'free',
+      },
+    }
+  );
+  if (result.modifiedCount > 0) {
+    console.log(`Expired ${result.modifiedCount} admin-granted subscriptions`);
+  }
+};
+
 const runSubscriptionReminderCheck = async () => {
   try {
+    await expireManualSubscriptions();
     const reminderDate = new Date();
     reminderDate.setDate(reminderDate.getDate() + REMINDER_DAYS_BEFORE);
     const { start, end } = getDayBounds(reminderDate);

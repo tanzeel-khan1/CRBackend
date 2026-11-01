@@ -8,6 +8,7 @@ const {
 } = require("../controllers/goalController");
 
 const { protect } = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
@@ -15,18 +16,18 @@ const router = express.Router();
 router.use(protect);
 
 // Create goal
-router.post("/", createGoal);
+router.post("/", asyncHandler(createGoal));
 
 // Get all goals
-router.get("/", getGoals);
+router.get("/", asyncHandler(getGoals));
 
 // Get single goal
-router.get("/:id", getGoalById);
+router.get("/:id", asyncHandler(getGoalById));
 
 // Update goal
-router.put("/:id", updateGoal);
+router.put("/:id", asyncHandler(updateGoal));
 
 // Delete goal
-router.delete("/:id", deleteGoal);
+router.delete("/:id", asyncHandler(deleteGoal));
 
 module.exports = router;

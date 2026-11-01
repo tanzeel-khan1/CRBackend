@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, adminOnly } = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 const {
   getSubmissionForm,
   submitFeedback,
@@ -11,13 +12,13 @@ const {
   updateFeedbackStatus,
 } = require('../controllers/feedbackController');
 
-router.get('/public/company/:companyId', getPublicCompanyFeedback);
-router.get('/public/:token', getSubmissionForm);
-router.post('/public/:token', submitFeedback);
+router.get('/public/company/:companyId', asyncHandler(getPublicCompanyFeedback));
+router.get('/public/:token', asyncHandler(getSubmissionForm));
+router.post('/public/:token', asyncHandler(submitFeedback));
 
-router.get('/company/status', protect, getCompanyFeedbackStatus);
-router.get('/mine', protect, getMyFeedback);
-router.get('/admin/pending', protect, adminOnly, getPendingFeedback);
-router.patch('/admin/:id/status', protect, adminOnly, updateFeedbackStatus);
+router.get('/company/status', protect, asyncHandler(getCompanyFeedbackStatus));
+router.get('/mine', protect, asyncHandler(getMyFeedback));
+router.get('/admin/pending', protect, adminOnly, asyncHandler(getPendingFeedback));
+router.patch('/admin/:id/status', protect, adminOnly, asyncHandler(updateFeedbackStatus));
 
 module.exports = router;

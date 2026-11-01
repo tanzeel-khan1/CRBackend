@@ -72,6 +72,11 @@ Password reset email delivery uses the same SMTP settings as other email feature
 | GET | `/api/feedback/public/company/:companyId` | List approved public feedback for a company |
 | GET | `/api/feedback/admin/pending` | List feedback awaiting review (platform admin) |
 | PATCH | `/api/feedback/admin/:id/status` | Approve or reject feedback (platform admin) |
+| GET | `/api/admin/overview` | Admin dashboard totals and pending feedback (platform admin) |
+| GET | `/api/admin/users` | Search and page through users (platform admin) |
+| PATCH | `/api/admin/users/:id/subscription` | Grant a user 30 days of enterprise access (platform admin) |
+| GET | `/api/admin/feedback` | Filter and page through feedback (platform admin) |
+| GET | `/api/admin/invoices` | Search, filter, and page through invoices (platform admin) |
 | GET | `/api/trash` | List the signed-in user's soft-deleted items |
 | POST | `/api/trash/:resource/:id/restore` | Restore an item from Trash |
 | DELETE | `/api/trash/:resource/:id` | Permanently delete an item from Trash |
@@ -86,6 +91,22 @@ a company also removes its related records.
 Before deploying, run `npm run migrate:soft-delete` once against the production
 database. This updates the Business Plan unique index so a deleted section does not
 block creating a replacement. Back up the database before running migrations.
+
+### Admin Dashboard
+
+Set `PLATFORM_ADMIN_EMAILS` to a comma-separated list of verified administrator
+email addresses. New and changed email addresses must be verified before admin
+access is granted. Sign in with an administrator account at `/admin` on the backend
+origin to view users and invoices and to approve or reject client feedback.
+Every admin API route verifies the signed-in user's admin role on the server.
+The user list can grant or extend a 30-day enterprise subscription without a
+Stripe charge. Stripe-managed subscriptions cannot be changed by this action;
+admin-granted access is automatically marked inactive after its end date by the
+subscription job, which checks every six hours.
+For local development, start the backend, then run `npm run dev` from the
+`admin` directory and open `http://localhost:7001/admin`. The local dashboard
+server forwards API requests to `http://localhost:5000` by default; configure
+`BACKEND_URL` or `ADMIN_PORT` to use a different backend or port.
 
 ### File Uploads
 Files are stored in `backend/uploads/` and served at `/uploads/<filename>`.

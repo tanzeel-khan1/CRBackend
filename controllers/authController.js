@@ -47,10 +47,14 @@ const otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
 };
 // POST /api/auth/login
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const { password } = req.body;
   const user = await User.findOne({ email });
   if (!user || !(await user.comparePassword(password))) {
     return res.status(401).json({ message: 'Invalid email or password' });
+  }
+  if (!user.isEmailVerified) {
+    return res.status(403).json({ message: 'Verify your email address before signing in' });
   }
   res.json({ ...user.toJSON(), token: generateToken(user._id) });
 };
@@ -166,26 +170,6 @@ const resetPassword = async (req, res) => {
   return res.json({ message: 'Password reset successfully. You can now sign in.' });
 };
 
-// POST /api/auth/google
-
-const googleLogin = async (req, res) => {
-  const { full_name, email, avatar_url } = req.body;
-
-  let user = await User.findOne({ email });
-
-  if (!user) {
-    user = await User.create({
-      full_name,
-      email,
-      avatar_url,
-    });
-  }
-
-  res.json({
-    ...user.toJSON(),
-    token: generateToken(user._id),
-  });
-};
 // GET /api/auth/me
 const getMe = async (req, res) => {
   const user = req.user.toJSON();
@@ -193,7 +177,8 @@ const getMe = async (req, res) => {
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
-  if (platformAdmins.includes(req.user.email.toLowerCase())) user.role = 'admin';
+  if (!req.user.isEmailVerified) user.role = 'user';
+  else if (platformAdmins.includes(req.user.email.toLowerCase())) user.role = 'admin';
   res.json(user);
 };
 
@@ -215,7 +200,11 @@ const updateProfile = async (req, res) => {
       user.full_name = trimmed;
     }
 
+    let emailVerificationOtp;
     if (email !== undefined) {
+      if (typeof email !== 'string') {
+        return res.status(400).json({ message: "Email must be a valid email address" });
+      }
       const normalized = email.trim().toLowerCase();
       if (!normalized) {
         return res.status(400).json({ message: "Email is required" });
@@ -225,7 +214,19 @@ const updateProfile = async (req, res) => {
         if (exists) {
           return res.status(400).json({ message: "Email already in use" });
         }
+
+        emailVerificationOtp = generateOTP();
+        try {
+          await sendOTPEmail(normalized, emailVerificationOtp);
+        } catch (error) {
+          console.error('Profile email verification email failed:', error.message);
+          return res.status(503).json({ message: 'Verification email could not be sent. Your email address was not changed.' });
+        }
+
         user.email = normalized;
+        user.isEmailVerified = false;
+        user.emailOtp = emailVerificationOtp;
+        user.emailOtpExpires = new Date(Date.now() + 5 * 60 * 1000);
       }
     }
 
@@ -241,7 +242,9 @@ const updateProfile = async (req, res) => {
     await user.save();
 
     return res.json({
-      message: "Profile updated successfully",
+      message: emailVerificationOtp
+        ? "Profile updated. Verify your new email address to continue signing in."
+        : "Profile updated successfully",
       user: user.toJSON(),
     });
   } catch (error) {
@@ -255,7 +258,6 @@ module.exports = {
   register,
   login,
   getMe,
-  googleLogin,
   updateProfile,
   verifyEmailOTP,
   requestPasswordReset,

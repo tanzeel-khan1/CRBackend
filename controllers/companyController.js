@@ -1,5 +1,6 @@
 const Company = require('../models/Company');
 const Investor = require('../models/Investor');
+const { canAccessCompany } = require('../middleware/companyAccess');
 const sendCompanyWelcomeEmail = require('../utils/sendCompanyWelcomeEmail');
 const { softDeleteById } = require('../utils/softDelete');
 
@@ -31,6 +32,9 @@ const getCompanies = async (req, res) => {
 const getCompany = async (req, res) => {
   const company = await Company.findById(req.params.id);
   if (!company) return res.status(404).json({ message: 'Company not found' });
+  if (!await canAccessCompany(req.user.email, company._id.toString())) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
   res.json(company);
 };
 
@@ -56,9 +60,20 @@ const createCompany = async (req, res) => {
 };
 
 const updateCompany = async (req, res) => {
-  const company = await Company.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const company = await Company.findById(req.params.id);
   if (!company) return res.status(404).json({ message: 'Company not found' });
-  res.json(company);
+  if (company.created_by?.toLowerCase().trim() !== req.user.email.toLowerCase().trim()) {
+    return res.status(403).json({ message: 'Only the company owner can update this company' });
+  }
+  const updates = { ...req.body };
+  delete updates._id;
+  delete updates.created_by;
+  const updatedCompany = await Company.findByIdAndUpdate(
+    req.params.id,
+    updates,
+    { new: true, runValidators: true }
+  );
+  res.json(updatedCompany);
 };
 
 const deleteCompany = async (req, res) => {
