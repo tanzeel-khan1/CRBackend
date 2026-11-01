@@ -93,7 +93,6 @@ database. This updates the Business Plan unique index so a deleted section does 
 block creating a replacement. Back up the database before running migrations.
 
 ### Admin Dashboard
-
 Set `PLATFORM_ADMIN_EMAILS` to a comma-separated list of verified administrator
 email addresses. New and changed email addresses must be verified before admin
 access is granted. Sign in with an administrator account at `/admin` on the backend
@@ -108,5 +107,3 @@ For local development, start the backend, then run `npm run dev` from the
 server forwards API requests to `http://localhost:5000` by default; configure
 `BACKEND_URL` or `ADMIN_PORT` to use a different backend or port.
 
-### File Uploads
-Files are stored in `backend/uploads/` and served at `/uploads/<filename>`.

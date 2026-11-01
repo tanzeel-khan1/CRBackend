@@ -138,3 +138,7 @@ module.exports = mongoose.model('User', userSchema);
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 83595b6967ef8bdb2edb4a6e722a113919985b22
