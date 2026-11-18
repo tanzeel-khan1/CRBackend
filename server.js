@@ -19,10 +19,9 @@ const app = express();
 const server = http.createServer(app);
 
 const allowedOrigins = [
-  'https://ranvola.netlify.app',
   'http://localhost:7000',
   'http://localhost:7001',
-  'https://app.tanzilbuilds.xyz'
+  'https://ranvola.tanzilbuilds.xyz'
 ];
 
 app.use(cors({
