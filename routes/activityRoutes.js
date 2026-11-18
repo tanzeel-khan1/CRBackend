@@ -9,4 +9,4 @@ router.route('/').get(asyncHandler(getActivities)).post(asyncHandler(createActiv
 
 router.delete('/company/:company_id', asyncHandler(deleteCompanyActivities));
 
-module.exports = router;		
+module.exports = router;	
