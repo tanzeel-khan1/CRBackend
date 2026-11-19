@@ -19,6 +19,12 @@ const formatDate = (value) => {
     : date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 };
 
+const formatCurrency = (amount, currency) => {
+  const supportedCurrencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'PKR'];
+  const currencyCode = supportedCurrencies.includes(currency) ? currency : 'USD';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(Number(amount) || 0);
+};
+
 router.post('/', protect, asyncHandler(async (req, res) => {
   const { to, subject, body, file_url, file_name, invoice } = req.body;
   if (!to) return res.status(400).json({ message: 'Recipient email is required' });
@@ -27,6 +33,7 @@ router.post('/', protect, asyncHandler(async (req, res) => {
     return res.status(503).json({ message: 'Email service not configured. Add SMTP_HOST, EMAIL_USER, EMAIL_PASS to your .env file.' });
   }
 
+  const currency = invoice?.currency || 'USD';
   const safeSubject = escapeHtml(subject || 'Document shared with you');
   const html = invoice ? `
     <div style="margin:0;background:#f4f5f7;padding:32px 16px;font-family:Arial,sans-serif;color:#172033;">
@@ -39,12 +46,12 @@ router.post('/', protect, asyncHandler(async (req, res) => {
         <div style="padding:32px;">
           <div style="display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #e5e7eb;padding-bottom:22px;">
             <div><div style="font-size:20px;font-weight:700;">${escapeHtml(invoice.title)}</div><div style="font-size:13px;color:#6b7280;margin-top:6px;">${escapeHtml(invoice.invoice_number)}</div></div>
-            <div style="text-align:right;font-size:24px;font-weight:700;">$${Number(invoice.total_amount || 0).toLocaleString()}</div>
+            <div style="text-align:right;font-size:24px;font-weight:700;">${escapeHtml(formatCurrency(invoice.total_amount || 0, currency))}</div>
           </div>
           <table role="presentation" style="width:100%;border-collapse:collapse;margin-top:22px;font-size:14px;">
-            <tr><td style="padding:9px 0;color:#6b7280;">Subtotal</td><td style="padding:9px 0;text-align:right;font-weight:600;">$${Number(invoice.amount || 0).toLocaleString()}</td></tr>
-            <tr><td style="padding:9px 0;color:#6b7280;">Tax</td><td style="padding:9px 0;text-align:right;font-weight:600;">$${Number(invoice.tax_amount || 0).toLocaleString()}</td></tr>
-            <tr><td style="border-top:1px solid #e5e7eb;padding:14px 0 0;font-size:16px;font-weight:700;">Total due</td><td style="border-top:1px solid #e5e7eb;padding:14px 0 0;text-align:right;font-size:16px;font-weight:700;">$${Number(invoice.total_amount || 0).toLocaleString()}</td></tr>
+            <tr><td style="padding:9px 0;color:#6b7280;">Subtotal</td><td style="padding:9px 0;text-align:right;font-weight:600;">${escapeHtml(formatCurrency(invoice.amount || 0, currency))}</td></tr>
+            <tr><td style="padding:9px 0;color:#6b7280;">Tax</td><td style="padding:9px 0;text-align:right;font-weight:600;">${escapeHtml(formatCurrency(invoice.tax_amount || 0, currency))}</td></tr>
+            <tr><td style="border-top:1px solid #e5e7eb;padding:14px 0 0;font-size:16px;font-weight:700;">Total due</td><td style="border-top:1px solid #e5e7eb;padding:14px 0 0;text-align:right;font-size:16px;font-weight:700;">${escapeHtml(formatCurrency(invoice.total_amount || 0, currency))}</td></tr>
           </table>
           <div style="margin-top:24px;background:#f8fafc;border-radius:10px;padding:14px 16px;font-size:13px;color:#475569;"><strong>Due date:</strong> ${formatDate(invoice.due_date)} &nbsp; <strong>Status:</strong> ${escapeHtml(invoice.status)}</div>
           ${invoice.notes ? `<div style="margin-top:20px;font-size:13px;color:#64748b;"><strong>Notes</strong><div style="margin-top:6px;white-space:pre-line;">${escapeHtml(invoice.notes)}</div></div>` : ''}

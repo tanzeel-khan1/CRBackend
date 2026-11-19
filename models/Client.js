@@ -26,6 +26,10 @@ const clientSchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    currency: {
+      type: String,
+      enum: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'PKR'],
+    },
     address: {
       type: String,
       trim: true,
