@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
-
+.env
+.env.local
+.env.example
 # Environment variables / secrets
 # Logs
 logs/
@@ -23,7 +25,4 @@ coverage/
 .cache/
 .npm/
 
-# IDE
-.idea/
-
-config.bat
+#
