@@ -1,7 +1,7 @@
 ﻿const http = require('http');
 const https = require('https');
 
-const KEEP_ALIVE_INTERVAL_MS = 60 * 60 * 1000;
+const KEEP_ALIVE_INTERVAL_MS = 30 * 60 * 1000;
 
 const startKeepAliveJob = () => {
   const pingUrl = process.env.KEEP_ALIVE_URL;
