@@ -1,6 +1,8 @@
 ﻿const http = require('http');
 const https = require('https');
 
+const KEEP_ALIVE_INTERVAL_MS = 60 * 60 * 1000;
+
 const startKeepAliveJob = () => {
   const pingUrl = process.env.KEEP_ALIVE_URL;
 
@@ -17,12 +19,12 @@ const startKeepAliveJob = () => {
   initialReq.on('error', () => {});
   initialReq.end();
 
-  // Har 6 ghante baad hit karo
+  // Best-effort ping; hosting providers may still suspend idle free services.
   setInterval(() => {
     const req = client.get(pingUrl, () => {});
     req.on('error', () => {});
     req.end();
-  }, 6 * 60 * 60 * 1000);
+  }, KEEP_ALIVE_INTERVAL_MS);
 };
 
 module.exports = { startKeepAliveJob };

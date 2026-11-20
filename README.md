@@ -21,6 +21,11 @@ npm run dev
 | `PORT` | Port to listen on | `5000` |
 | `FRONTEND_URL` | CORS allowed origin | `http://localhost:5173` |
 | `PLATFORM_ADMIN_EMAILS` | Comma-separated platform administrator emails for moderation access | _(optional)_ |
+| `KEEP_ALIVE_URL` | Public backend URL pinged hourly as a best-effort keep-alive | _(optional)_ |
+
+`KEEP_ALIVE_URL` should point to the deployed backend's public root URL. The
+backend sends a ping on startup and once per hour. This is best-effort only:
+free hosting providers may still suspend services based on their idle policy.
 
 ## API Endpoints
 
