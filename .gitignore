@@ -1,7 +1,5 @@
 # Dependencies
 node_modules/
-.env
-.env.local
 .env.example
 # Environment variables / secrets
 # Logs
@@ -11,7 +9,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
 # Build / coverage
 dist/
 build/
@@ -25,4 +22,5 @@ coverage/
 .cache/
 .npm/
 
-#
+
+config.bat
